@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { setTimeout } from 'timers'
+
 let SAMPLE_BOOKS = [
   {
     id: 1,
@@ -38,6 +40,16 @@ let SAMPLE_BOOKS = [
   }
 ]
 
+var bookSearchPromise = function () {
+  return new Promise(
+    function (resolve, reject) {
+      setTimeout(function () {
+        resolve(SAMPLE_BOOKS)
+      }, 1000)
+    }
+  )
+}
+
 export default {
   name: 'MyApp',
   data () {
@@ -48,14 +60,13 @@ export default {
     }
   },
   computerd: {
-    bookResult: function () {
-      return this.bookSearch()
-    }
   },
   methods: {
     bookSearch: function () {
-      console.info('bookSearch')
-      this.books.splice(0, this.books.length, ...SAMPLE_BOOKS)
+      var self = this
+      bookSearchPromise().then(function (books) {
+        self.books.splice(0, self.books.length, ...books)
+      })
     }
   }
 }
