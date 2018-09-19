@@ -1,36 +1,61 @@
 <template>
   <div class="my-app">
-    <h1>{{ msg }}</h1>
+    <h1>{{ appName }}</h1>
     <h2>Menu</h2>
     <ul>
-        <menu-item v-for='item in menuItems' :key='item.id' :dispaly-name='item.name'>
-        </menu-item>
+      <li><router-link to='home'>Home</router-link></li>
+      <li><router-link to='contact'>Contact</router-link></li>
     </ul>
+
+    <input v-model="keyword" placeholder="keyword">
+    <button id='book-search' v-on:click='bookSearch'>Search</button>
+    <p>keyword is {{ keyword }}</p>
+
+    <div class='search-result'>
+      <div class='book' v-for='book in books' :key='book.isbn13'>
+        <h1 class='book-title'>{{ book.title }}</h1>
+        <h2 class='book-author'>{{ book.author }}</h2>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import Vue from 'vue'
-
-var menuItem = Vue.component('menu-item', {
-  props: ['display-name'],
-  template: '<li>{{ display-name }}</li>',
-  data () {
-    return {
-      menuItems: [
-        {'id': 1, 'name': 'Home', 'link-to': '/'},
-        {'id': 2, 'name': 'Contact', 'link-to': '/contact'}
-      ]
-    }
+let SAMPLE_BOOKS = [
+  {
+    id: 1,
+    title: '数学ガール (数学ガールシリーズ 1)',
+    author: '結城 浩',
+    isbn13: '978-4797341379',
+    icon_url: ''
+  },
+  {
+    id: 2,
+    title: '数学ガールの秘密ノート/式とグラフ',
+    author: '結城 浩',
+    isbn13: '978-4797374148',
+    icon_url: ''
   }
-})
+]
 
 export default {
   name: 'MyApp',
-  components: { menuItem },
   data () {
     return {
-      msg: 'Welcome to Bookue'
+      appName: 'Welcome to Bookue',
+      keyword: '',
+      books: []
+    }
+  },
+  computerd: {
+    bookResult: function () {
+      return this.bookSearch()
+    }
+  },
+  methods: {
+    bookSearch: function () {
+      console.info('bookSearch')
+      this.books.splice(0, this.books.length, ...SAMPLE_BOOKS)
     }
   }
 }
@@ -51,5 +76,9 @@ li {
 }
 a {
   color: #42b983;
+}
+
+li .book {
+  display: block;
 }
 </style>
