@@ -54,7 +54,7 @@ export default {
   name: 'MyApp',
   data () {
     return {
-      appName: 'Welcome to Bookue',
+      appName: 'Welcome to Boo Koo',
       keyword: '',
       books: []
     }
