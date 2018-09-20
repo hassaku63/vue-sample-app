@@ -21,9 +21,11 @@
 </template>
 
 <script>
-import { setTimeout } from 'timers'
+// import { setTimeout } from 'timers'
+import * as axios from 'axios'
+// import qs from 'qs'
 
-let SAMPLE_BOOKS = [
+/* let SAMPLE_BOOKS = [
   {
     id: 1,
     title: '数学ガール (数学ガールシリーズ 1)',
@@ -38,9 +40,9 @@ let SAMPLE_BOOKS = [
     isbn13: '978-4797374148',
     icon_url: ''
   }
-]
+] */
 
-var bookSearchPromise = function () {
+/* var bookSearchPromise = function () {
   return new Promise(
     function (resolve, reject) {
       setTimeout(function () {
@@ -48,7 +50,17 @@ var bookSearchPromise = function () {
       }, 1000)
     }
   )
-}
+} */
+
+/* var bookSearchAsync = async function (keyword) {
+  function search (ret) {
+    console.log(ret)
+    console.log()
+    return SAMPLE_BOOKS
+  }
+
+  return search(await axios.get('https://www.googleapis.com/books/v1/volumes?' + qs.stringify({q: keyword})))
+} */
 
 export default {
   name: 'MyApp',
@@ -63,9 +75,32 @@ export default {
   },
   methods: {
     bookSearch: function () {
+      console.log('bookSearch called')
       var self = this
-      bookSearchPromise().then(function (books) {
-        self.books.splice(0, self.books.length, ...books)
+      axios.get('https://www.googleapis.com/books/v1/volumes', {
+        params: {
+          q: this.keyword
+        }
+      }).then(result => {
+        console.log(result)
+        // self.books.splice(0, self.books.length, ...books)
+        if (result.status === 200) {
+          var books = []
+          result.data.items.forEach(element => {
+            books.push({
+              title: element.volumeInfo.title,
+              author: element.volumeInfo.authors.join('/'),
+              description: element.volumeInfo.description,
+              isbn13: element.id
+            })
+          })
+
+          console.log('books!')
+          console.log(books)
+          self.books.splice(0, self.books.length, ...books)
+        }
+      }).catch(error => {
+        alert('error: bookSearch\n' + error)
       })
     }
   }
