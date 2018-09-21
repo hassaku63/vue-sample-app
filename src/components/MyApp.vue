@@ -8,22 +8,29 @@
     </ul>
 
     <input v-model="keyword" placeholder="keyword">
-    <button id='book-search' v-on:click='bookSearch'>Search</button>
+    <button id='book-search' @click='bookSearch'>Search</button>
     <p>keyword is {{ keyword }}</p>
 
-    <div class='search-result'>
-      <div class='book' v-for='book in books' :key='book.isbn13'>
-        <h1 class='book-title'>{{ book.title }}</h1>
-        <h2 class='book-author'>{{ book.author }}</h2>
+    <div class='search-result container'>
+      <div class='book row' v-for='book in books' :key='book.isbn13'>
+        <div class='book-info four columns'>
+          <h3 class='book-title'>{{ book.title }}</h3>
+          <h4 class='book-author'>{{ book.author }}</h4>
+        </div>
+        <div class='book-detail seven columns'>
+          <p class='book-description'>{{ book.shortDescription }}</p>
+        </div>
+        <div class='book-action one columns'>
+          <button class='book-rental' name='isbn13' :value='book.isbn13' @click='onRentalClicked'>Rental</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-// import { setTimeout } from 'timers'
 import * as axios from 'axios'
-// import qs from 'qs'
+import * as _ from 'lodash'
 
 /* let SAMPLE_BOOKS = [
   {
@@ -75,6 +82,10 @@ export default {
   },
   methods: {
     bookSearch: function () {
+      /*
+        TODO:
+        - [ ] 空文字で検索した場合、不正なクエリになりレスポンスが400になる
+      */
       console.log('bookSearch called')
       var self = this
       axios.get('https://www.googleapis.com/books/v1/volumes', {
@@ -82,16 +93,23 @@ export default {
           q: this.keyword
         }
       }).then(result => {
+        /*
+          TODO:
+          - [ ] 検索の一致が0件だった場合のハンドリングが必要。今はforeachで例外が出る
+        */
         console.log(result)
         // self.books.splice(0, self.books.length, ...books)
         if (result.status === 200) {
           var books = []
-          result.data.items.forEach(element => {
+          result.data.items.forEach(item => {
             books.push({
-              title: element.volumeInfo.title,
-              author: element.volumeInfo.authors.join('/'),
-              description: element.volumeInfo.description,
-              isbn13: element.id
+              title: _.get(item, 'volumeInfo.title', 'No title'),
+              author: _.get(item, 'volumeInfo.authors', ['No author']).join('/'),
+              categories: _.get(item, 'volumeInfo.categories', []),
+              shortDescription: _.get(item, 'searchInfo.textSnippet', 'No description'),
+              description: _.get(item, 'volumeInfo.description', 'No descroption'),
+              imageLink: _.get(item, 'volumeInfo.imageLinks.smallThumbnail', undefined),
+              isbn13: _.get(item, 'id') // volumeInfo.industryIdentifiers
             })
           })
 
@@ -102,6 +120,11 @@ export default {
       }).catch(error => {
         alert('error: bookSearch\n' + error)
       })
+    },
+    onRentalClicked: function (event) {
+      console.log('onRentalClicked')
+      console.log(event.srcElement.value)
+      console.log(event.value)
     }
   }
 }
@@ -124,7 +147,27 @@ a {
   color: #42b983;
 }
 
-li .book {
-  display: block;
+.book-info {
+  text-align: left;
+}
+
+.book-detail {
+  text-align: left;
+}
+
+h3.book-title {
+
+}
+
+h4.book-author {
+
+}
+
+p.book-description {
+
+}
+
+button.book-rental {
+
 }
 </style>
